@@ -11,16 +11,18 @@
 
 - [Dependencies](#dependencies)
 - [Install](#install)
-- [Why?](#why)
 - [Contributing](#contributing)
 - [License](#license)
 
 # Dependencies
 
 - `bash`, `curl`, `tar`: generic POSIX utilities.
-- `SOME_ENV_VAR`: set this environment variable in your shell config to load the correct version of tool x.
+- `meson`, `ninja`: generating build configuration.
+- `gcc`/Visual Studio: compiling source code.
 
 # Install
+
+> asdf-janet will automatically install JPM from master branch. You disable JPM installation by setting environment variable `JPM_TAG` to empty string.
 
 Plugin:
 
@@ -45,6 +47,8 @@ asdf global janet latest
 # Now janet commands are available
 janet -v
 ```
+
+> This plugin supports ref based installation. You can get latest Janet commit with: `asdf install janet ref:master`.
 
 Check [asdf](https://github.com/asdf-vm/asdf) readme for more instructions on how to
 install & manage versions.

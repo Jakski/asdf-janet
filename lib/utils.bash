@@ -2,10 +2,11 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for janet.
 GH_REPO="https://github.com/janet-lang/janet"
+GH_REPO_JPM="https://github.com/janet-lang/jpm"
 TOOL_NAME="janet"
 TOOL_TEST="janet -v"
+JPM_TAG=${JPM_TAG:-master}
 
 fail() {
   echo -e "asdf-$TOOL_NAME: $*"
@@ -31,8 +32,6 @@ list_github_tags() {
 }
 
 list_all_versions() {
-  # TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-  # Change this function if janet has other means of determining installable versions.
   list_github_tags
 }
 
@@ -40,11 +39,13 @@ download_release() {
   local version filename url
   version="$1"
   filename="$2"
+  if [ "$ASDF_INSTALL_TYPE" = "version" ]; then
+    version="v${version}"
+  fi
 
-  # TODO: Adapt the release URL convention for janet
-  url="$GH_REPO/archive/v${version}.tar.gz"
+  url="$GH_REPO/archive/${version}.tar.gz"
 
-  echo "* Downloading $TOOL_NAME release $version..."
+  echo "* Downloading $TOOL_NAME $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
@@ -52,19 +53,37 @@ install_version() {
   local install_type="$1"
   local version="$2"
   local install_path="$3"
-
-  if [ "$install_type" != "version" ]; then
-    fail "asdf-$TOOL_NAME supports release installs only"
+  local tool_cmd
+  tool_cmd="${install_path}/bin/$(echo "$TOOL_TEST" | cut -d' ' -f1)"
+  local git_hash
+  if [ "$ASDF_INSTALL_TYPE" = "version" ]; then
+    git_hash="meson"
+  else
+    git_hash="$ASDF_INSTALL_VERSION"
   fi
 
   (
     mkdir -p "$install_path"
-    cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
+    pushd "$ASDF_DOWNLOAD_PATH"
+    meson setup build \
+      --buildtype release \
+      --optimization 2 \
+      --prefix "$install_path" \
+      -Dgit_hash="$git_hash"
+    ninja -C build
+    ninja -C build install
+    if [ -n "$JPM_TAG" ]; then
+      local jpm_url="${GH_REPO_JPM}/archive/${JPM_TAG}.tar.gz"
+      mkdir "${ASDF_DOWNLOAD_PATH}/jpm"
+      curl "${curl_opts[@]}" "$jpm_url" | tar -C "${ASDF_DOWNLOAD_PATH}/jpm" -xzf - --strip-components=1 ||
+        fail "Could not extract JPM archive"
+      pushd "${ASDF_DOWNLOAD_PATH}/jpm"
+      PREFIX="$install_path" "$tool_cmd" bootstrap.janet
+      popd
+    fi
+    popd
 
-    # TODO: Asert janet executable exists.
-    local tool_cmd
-    tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
-    test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
+    test -x "$tool_cmd" || fail "Expected $tool_cmd to be executable."
 
     echo "$TOOL_NAME $version installation was successful!"
   ) || (
