@@ -69,6 +69,7 @@ install_version() {
       --buildtype release \
       --optimization 2 \
       --prefix "$install_path" \
+      --libdir "${install_path}/lib" \
       -Dgit_hash="$git_hash"
     ninja -C build
     ninja -C build install
