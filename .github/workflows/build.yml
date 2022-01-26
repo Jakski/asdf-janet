@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - test
   pull_request:
 
 jobs:
@@ -12,11 +13,18 @@ jobs:
     strategy:
       matrix:
         os:
+          - macos-latest
           - ubuntu-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Install dependencies
+      - name: Install dependencies for Ubuntu
+        if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get install -y meson ninja-build build-essential
+
+      - name: Install dependencies for MacOS
+        if: matrix.os == 'macos-latest'
+        run: brew install gcc ninja meson curl
+
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v1
         with:
