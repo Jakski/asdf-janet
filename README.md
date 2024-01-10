@@ -22,7 +22,7 @@
 
 # Install
 
-> asdf-janet will automatically install JPM from master branch. You disable JPM installation by setting environment variable `JPM_TAG` to empty string.
+> asdf-janet will automatically install JPM from master branch. You disable JPM installation by setting environment variable `JPM_REF` to space(`JPM_REF=""`).
 
 Plugin:
 
