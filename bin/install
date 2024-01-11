@@ -10,7 +10,7 @@ else
 	git_hash="$ASDF_INSTALL_VERSION"
 fi
 
-if [ -v LD_LIBRARY_PATH ]; then
+if [ -n "${LD_LIBRARY_PATH:-}" ]; then
 	export LD_LIBRARY_PATH="${ASDF_INSTALL_PATH}/bin:${LD_LIBRARY_PATH}/lib"
 else
 	export LD_LIBRARY_PATH="${ASDF_INSTALL_PATH}/lib"
