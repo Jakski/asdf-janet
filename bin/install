@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-
 declare git_hash
 
 if [ "$ASDF_INSTALL_TYPE" = "version" ]; then

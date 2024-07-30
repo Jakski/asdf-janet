@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
 
 if [ -n "${LD_LIBRARY_PATH:-}" ]; then
 	export LD_LIBRARY_PATH="${ASDF_INSTALL_PATH}/bin:${LD_LIBRARY_PATH}/lib"
